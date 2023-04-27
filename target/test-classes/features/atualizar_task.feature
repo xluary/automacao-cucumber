@@ -20,11 +20,23 @@ Funcionalidade: Atualizar tarefa
       | original |
     E a tarefa foi cadastrada
       | title                 |
-      | atualizacao de tarefa |
+      | Atualizar descricao da tarefa |
     Quando atualizar a tarefa
       | description |
       | atualizado  |
     Entao a resposta devera ser 200
+
+  Cenário: Encerrar tarefa
+    Dado que o usuario foi cadastrado
+      | name       |
+      | original   |
+    E a tarefa foi cadastrada
+      | description     |
+      | Encerrar tarefa |
+    Quando atualizar o status da tarefa para CLOSE
+    Entao a resposta devera ser 200
+    E o closedAt deve ser nao nulo
+
 
 
 

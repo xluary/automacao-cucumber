@@ -86,12 +86,30 @@ public class StepDefinition {
     public void atualizarTarefa(DataTable data) throws SQLException {
         List<Task> listaDeAtividades = DatabaseUtil.findTaskByTitle(task.getTitle());
         Task taskAtaual = listaDeAtividades.get(0);
-        Task novaTask = createTaskFromDataTable(taskAtaual.getUser(), data);
-        taskParaCadastro = removerLocalDate(novaTask);
+        String title = data.asMap().get("title");
+        if (title != null) {
+            taskAtaual.setTitle(title);
+        }
+        String description = data.asMap().get("description");
+        if (description != null) {
+            taskAtaual.setDescription(description);
+        }
+        taskParaCadastro = removerLocalDate(taskAtaual);
         String jsonBody = gson.toJson(taskParaCadastro) ;
         response = request.body(jsonBody).when().put("/tasks/" + taskAtaual.getId());
     }
 
+    @Quando("atualizar o status da tarefa para CLOSE")
+    public void encerrarTarefa() throws SQLException {
+        List<Task> listaDeAtividades = DatabaseUtil.findTaskByTitle(task.getTitle());
+        Task task = listaDeAtividades.get(0);
+        task.setStatus(TaskStatus.CLOSE);
+        taskParaCadastro = removerLocalDate(task);
+        String jsonBody = gson.toJson(taskParaCadastro) ;
+        response = request.body(jsonBody).when().put("/tasks/" + task.getId());
+        response.prettyPrint();
+        DatabaseUtil.updateTask(task);
+    }
 
     @Entao("a resposta devera ser {int}")
     public void verificarResposta(int status){
@@ -129,6 +147,14 @@ public class StepDefinition {
         taskParaCadastro = removerLocalDate(task);
         String jsonBody = gson.toJson(taskParaCadastro) ;
         response = request.body(jsonBody).when().put("/tasks/" + taskId);
+
+    }
+
+    @E("o closedAt deve ser nao nulo")
+    public void conferirClosedAt() throws SQLException {
+        List<Task> listaDeAtividades = DatabaseUtil.findTaskByTitle(task.getTitle());
+        Task taskAtual= listaDeAtividades.get(0);
+        assertNotNull(task.getClosedAt());
     }
 
     private User createUserFromDataTable(DataTable data) {
