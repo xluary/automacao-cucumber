@@ -111,6 +111,16 @@ public class StepDefinition {
         DatabaseUtil.updateTask(task);
     }
 
+    @Quando("tentar deletar a tarefa")
+    public void deletarTarefa() throws SQLException {
+        List<Task> listaDeAtividades = DatabaseUtil.findTaskByTitle(task.getTitle());
+        Task task = listaDeAtividades.get(0);
+        String jsonBody = gson.toJson(taskParaCadastro) ;
+        response = request.body(jsonBody).when().delete("/tasks/" + task.getId());
+        response.prettyPrint();
+
+    }
+
     @Entao("a resposta devera ser {int}")
     public void verificarResposta(int status){
         response.then().statusCode(status);
@@ -148,6 +158,11 @@ public class StepDefinition {
         String jsonBody = gson.toJson(taskParaCadastro) ;
         response = request.body(jsonBody).when().put("/tasks/" + taskId);
 
+    }
+
+    @E("a mensagem deveria ser {string}")
+    public void conferirMensagem(String mensagem){
+       assertEquals(mensagem, response.jsonPath().get("error"));
     }
 
     @E("o closedAt deve ser nao nulo")

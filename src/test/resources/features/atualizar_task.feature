@@ -37,6 +37,18 @@ Funcionalidade: Atualizar tarefa
     Entao a resposta devera ser 200
     E o closedAt deve ser nao nulo
 
+  Cenário: Atualizar tarefa encerrada
+    Dado que o usuario foi cadastrado
+      | name       |
+      | original   |
+    E a tarefa foi cadastrada
+      | description     |
+      | Atualizar tarefa encerrada |
+    Quando atualizar o status da tarefa para CLOSE
+    E atualizar o usuario da tarefa
+    Entao a resposta devera ser 422
+
+
 
 
 
