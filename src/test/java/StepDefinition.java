@@ -82,6 +82,17 @@ public class StepDefinition {
         DatabaseUtil.insertUser(newUser);
     }
 
+    @Quando("atualizar a tarefa")
+    public void atualizarTarefa(DataTable data) throws SQLException {
+        List<Task> listaDeAtividades = DatabaseUtil.findTaskByTitle(task.getTitle());
+        Task taskAtaual = listaDeAtividades.get(0);
+        Task novaTask = createTaskFromDataTable(taskAtaual.getUser(), data);
+        taskParaCadastro = removerLocalDate(novaTask);
+        String jsonBody = gson.toJson(taskParaCadastro) ;
+        response = request.body(jsonBody).when().put("/tasks/" + taskAtaual.getId());
+    }
+
+
     @Entao("a resposta devera ser {int}")
     public void verificarResposta(int status){
         response.then().statusCode(status);

@@ -14,3 +14,17 @@ Funcionalidade: Atualizar tarefa
     E atualizar o usuario da tarefa
     Entao a resposta devera ser 200
 
+  Cenário: Atualizar descricao da tarefa
+    Dado que o usuario foi cadastrado
+      | name       |
+      | original |
+    E a tarefa foi cadastrada
+      | title                 |
+      | atualizacao de tarefa |
+    Quando atualizar a tarefa
+      | description |
+      | atualizado  |
+    Entao a resposta devera ser 200
+
+
+
