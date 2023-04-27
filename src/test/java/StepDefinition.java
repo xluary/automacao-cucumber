@@ -7,27 +7,28 @@ import io.cucumber.java.pt.Entao;
 import io.cucumber.java.pt.Quando;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.RandomStringUtils;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
 public class StepDefinition {
     private Gson gson = new Gson();
     private User user;
+    private User newUser;
     private TaskSemLocalDate taskParaCadastro;
     private Task task;
+
+
     private RequestSpecification request = RestAssured.given()
             .baseUri("http://localhost:8080/api")
             .contentType(ContentType.JSON);
     private Response response;
 
-    @Dado("o usuario foi cadastrado")
+    @Dado("que o usuario foi cadastrado")
     public void cadastroUsuario(DataTable data) throws SQLException {
         user = createUserFromDataTable(data);
         DatabaseUtil.insertUser(user);
@@ -44,6 +45,7 @@ public class StepDefinition {
         }
         assertEquals(status, taskEncontrada);
     }
+
 
     @Quando("cadastrar nova tarefa")
     public void cadastrarTarefa(DataTable data)  {
@@ -74,6 +76,12 @@ public class StepDefinition {
         response.prettyPrint();
     }
 
+    @Quando("criar novo usuario")
+    public void cadastrarNovoUsuario(DataTable data) throws SQLException {
+        newUser = createUserFromDataTable(data);
+        DatabaseUtil.insertUser(newUser);
+    }
+
     @Entao("a resposta devera ser {int}")
     public void verificarResposta(int status){
         response.then().statusCode(status);
@@ -92,6 +100,25 @@ public class StepDefinition {
         assertEquals(status, taskEncontrada);
     }
 
+    @E("a tarefa foi cadastrada")
+    public void cadastrarNovaTarefa(DataTable data) throws SQLException {
+        task = createTaskFromDataTable(user, data);
+        taskParaCadastro = removerLocalDate(task);
+        String jsonBody = gson.toJson(taskParaCadastro) ;
+        response = request.body(jsonBody).when().post("/tasks");
+        response.prettyPrint();
+    }
+
+
+    @E("atualizar o usuario da tarefa")
+    public void atualizarUsuarioTarefa() throws SQLException {
+        List<Task> listaDeAtividades = DatabaseUtil.findTaskByTitle(task.getTitle());
+        Long taskId = listaDeAtividades.get(0).getId();
+        task.setUser(newUser);
+        taskParaCadastro = removerLocalDate(task);
+        String jsonBody = gson.toJson(taskParaCadastro) ;
+        response = request.body(jsonBody).when().put("/tasks/" + taskId);
+    }
 
     private User createUserFromDataTable(DataTable data) {
         User user = new User();
